@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting App</title>
+</head>
+
+<body>
+    <h1>Voting App</h1>
+
+    <div id="poll"></div>
+
+    <script>
+        async function loadPoll() {
+            const response = await fetch("/api/poll");
+            const options = await response.json();
+
+            const pollDiv = document.getElementById("poll");
+            pollDiv.innerHTML = "";
+
+            options.forEach(option => {
+                const container = document.createElement("div");
+
+                const text = document.createElement("span");
+                text.textContent =
+                    option.option_name + " - Votes: " + option.votes + " ";
+
+                const button = document.createElement("button");
+                button.textContent = "Vote";
+
+                button.onclick = async function () {
+                    await fetch("/api/vote", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            id: option.id
+                        })
+                    });
+
+                    loadPoll();
+                };
+
+                container.appendChild(text);
+                container.appendChild(button);
+
+                pollDiv.appendChild(container);
+            });
+        }
+
+        loadPoll();
+    </script>
+</body>
+</html>
